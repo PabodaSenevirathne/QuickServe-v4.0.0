@@ -27,10 +27,12 @@ router.post('/register', [
   
     try {
       const { email, password, userName, firstName, lastName, shippingAddress } = req.body;
+      // Generate a unique 4-digit user ID
+      const userId = Math.floor(1000 + Math.random() * 9000);
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = new User({ email, password: hashedPassword, userName, firstName, lastName, shippingAddress });
+      const user = new User({userId, email, password: hashedPassword, userName, firstName, lastName, shippingAddress });
       await user.save();
-      res.status(201).json({ message: 'User registered successfully' });
+      res.status(201).json({ message: 'User registered successfully', userId });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
@@ -51,7 +53,7 @@ router.post('/register', [
         return res.status(401).json({ message: 'Invalid credentials' });
       }
       const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ message: 'Valid credentials', token });
+    res.json({ message: 'Login Sucessfull', token });
       // res.json({ token });
     } catch (error) {
       console.error(error);
@@ -84,16 +86,16 @@ router.get('/:userId', async (req, res) => {
 });
 
 // POST a new user
-router.post('/', async (req, res) => {
-    const { userId, email, password, userName, firstName, lastName, shippingAddress } = req.body;
-    try {
-        const newUser = new User({ userId, email, password, userName, firstName, lastName, shippingAddress });
-        await newUser.save();
-        res.status(201).json(newUser);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
-});
+// router.post('/', async (req, res) => {
+//     const { userId, email, password, userName, firstName, lastName, shippingAddress } = req.body;
+//     try {
+//         const newUser = new User({ userId, email, password, userName, firstName, lastName, shippingAddress });
+//         await newUser.save();
+//         res.status(201).json(newUser);
+//     } catch (err) {
+//         res.status(400).json({ message: err.message });
+//     }
+// });
 
 // UPDATE a user by userId
 router.put('/:userId', async (req, res) => {
@@ -104,7 +106,10 @@ router.put('/:userId', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         user.email = email;
-        user.password = password;
+        if (req.body.password) {
+          const hashedPassword = await bcrypt.hash(req.body.password, 10);
+          user.password = hashedPassword;
+      }
         user.userName = userName;
         user.firstName = firstName;
         user.lastName = lastName;
