@@ -37,8 +37,10 @@ router.get('/user/:userId', async (req, res) => {
 
 // POST a new order
 router.post('/', async (req, res) => {
-    const { orderId, products, quantities, user, totalAmount } = req.body;
+    const { products, quantities, user, totalAmount } = req.body;
     try {
+        // Generate a unique 4-digit order ID
+        const orderId = Math.floor(1000 + Math.random() * 9000);
         const newOrder = new Order({ orderId, products, quantities, user, totalAmount });
         await newOrder.save();
         res.status(201).json(newOrder);
@@ -46,6 +48,7 @@ router.post('/', async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 });
+
 
 // UPDATE an order by orderId
 router.put('/:orderId', async (req, res) => {

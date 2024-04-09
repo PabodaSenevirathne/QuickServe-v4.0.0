@@ -41,8 +41,10 @@ router.get('/:commentId', async (req, res) => {
 
 // POST a new comment
 router.post('/', async (req, res) => {
-    const { commentId, product, user, rating, image, text } = req.body;
+    const { product, user, rating, image, text } = req.body;
     try {
+        // Generate a unique 4-digit comment ID
+        const commentId = Math.floor(1000 + Math.random() * 9000);
         const newComment = new Comment({ commentId, product, user, rating, image, text });
         const savedComment = await newComment.save();
         res.status(201).json(savedComment);

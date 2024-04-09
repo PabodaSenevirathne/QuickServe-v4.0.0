@@ -41,15 +41,17 @@ router.get('/user/:userId', async (req, res) => {
 
 // POST a new cart
 router.post('/', async (req, res) => {
-    const { cartId, products, quantities, user } = req.body;
+    const { products, quantities, user } = req.body;
     try {
+        // Generate a unique 4-digit cart ID
+        const cartId = Math.floor(1000 + Math.random() * 9000);
         const newCart = new Cart({ cartId, products, quantities, user });
         const savedCart = await newCart.save();
         res.status(201).json(savedCart);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
-});
+})
 
 // PUT (update quantities) for products in a cart by cartId and productId
 router.put('/:cartId/products/:productId', async (req, res) => {
